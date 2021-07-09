@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { User } from './interfaces/user.interface';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
@@ -6,18 +6,27 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class UsersService {
-  constructor(private HttpService: HttpService) {}
+  constructor(private httpService: HttpService) {}
+
   async create(user: User): Promise<Observable<AxiosResponse<any>>> {
-    const response = await this.HttpService.get(
-      'https://jsonplaceholder.typicode.com/users/1',
-    ).toPromise();
+    const response = await this.httpService.get('https://jsonplaceholder.typicode.com/users/1').toPromise();
     return response.data;
   }
 
   async findOne(id: string): Promise<Observable<AxiosResponse<any>>> {
-    const response = await this.HttpService.get(
-      'https://jsonplaceholder.typicode.com/users/' + id,
-    ).toPromise();
-    return response.data;
+    try {
+      const response = await this.httpService.get('https://jsonplaceholder.typicode.com/users/' + id).toPromise();
+      return response.data;
+    } catch (e) {
+      throw new HttpException(
+        {
+          error: {
+            success: false,
+            message: 'User not found',
+          },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

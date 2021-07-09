@@ -1,20 +1,30 @@
-import {
-  Controller,
-  Get,
-  Res,
-  Param,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Res, Param, HttpStatus, Logger } from '@nestjs/common';
 import { Response } from 'express';
 import { ProductsService } from './product.service';
+import { ProductSuccessResponse, ProductErrorResponse } from './dto/product.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly appService: ProductsService) {}
   private readonly logger = new Logger(ProductsController.name);
 
+  @Get('feed')
+  getFeed() {
+    return this.appService.getProductFeed();
+  }
+
   @Get(':id')
+  @ApiOperation({ summary: 'Get product details by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'OK',
+    type: ProductSuccessResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request', type: ProductErrorResponse })
+  @ApiResponse({ status: 401, description: 'Unauthorized', type: ProductErrorResponse })
+  @ApiResponse({ status: 500, description: 'Internal Server Error', type: ProductErrorResponse })
   findOne(@Param('id') id: string, @Res() res: Response) {
     this.logger.log('get product by id');
     const product = this.appService.findOne(id);

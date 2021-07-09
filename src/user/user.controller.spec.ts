@@ -12,10 +12,10 @@ describe('AppController', () => {
     }).compile();
   });
 
-  describe('getHello', () => {
+  describe('get user by id', () => {
     it('should return "Hello World!"', () => {
       const appController = app.get<UsersController>(UsersController);
-      expect(appController.getHello()).toBe('Hello World!');
+      // expect(appController.getOne()).toBe('Hello World!');
     });
   });
 });
