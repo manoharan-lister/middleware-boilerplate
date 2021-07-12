@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { CartsService } from './cart.service';
 import { CartSuccessResponse, CartErrorResponse } from './dto/cart.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import {response} from '../common/response';
 @ApiTags('carts')
 @Controller('carts')
 export class CartsController {
@@ -24,15 +24,11 @@ export class CartsController {
     this.logger.log('get cart by id');
     // custom error
     if (id != '1') {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'cart not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      response(false,HttpStatus.BAD_REQUEST,'Cart not found',null,res);
+    }else{
+      const cart = this.cartService.findOne(id);
+      response(true,HttpStatus.OK,'Cart details',cart,res);
     }
-    const cart = this.cartService.findOne(id);
-    res.status(HttpStatus.OK).json({ data: cart });
+    
   }
 }

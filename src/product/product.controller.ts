@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { ProductsService } from './product.service';
 import { ProductSuccessResponse, ProductErrorResponse } from './dto/product.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import {response} from '../common/response';
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
@@ -28,6 +28,10 @@ export class ProductsController {
   findOne(@Param('id') id: string, @Res() res: Response) {
     this.logger.log('get product by id');
     const product = this.appService.findOne(id);
-    res.status(HttpStatus.OK).json({ data: product });
+    if(product){
+      response(true,HttpStatus.OK,'Product details',product,res);
+    }else{
+      response(false,HttpStatus.BAD_REQUEST,'Product not found',null,res);
+    }
   }
 }

@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { OrdersService } from './order.service';
 import { OrderSuccessResponse, OrderErrorResponse } from './dto/order.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
+import {response} from '../common/response';
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
@@ -23,15 +23,11 @@ export class OrdersController {
   getOne(@Param('id') id: string, @Res() res: Response) {
     this.logger.log('get order by id');
     if (id != '1') {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'order not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      response(false,HttpStatus.BAD_REQUEST,'Order not found',null,res);
+    }else{
+      const order = this.orderService.findOne(id);
+      response(true,HttpStatus.OK,'Order details',order,res);
     }
-    const order = this.orderService.findOne(id);
-    res.status(HttpStatus.OK).json({ data: order });
+    
   }
 }

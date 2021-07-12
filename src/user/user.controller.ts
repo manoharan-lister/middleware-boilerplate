@@ -4,7 +4,7 @@ import { UsersService } from './user.service';
 import { CreateUserDto, UserSuccessResponse, UserErrorResponse } from './dto/create-user.dto';
 import { WebviewDto } from './dto/webview.dto';
 import { Response } from 'express';
-
+import { response } from '../common/response';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
@@ -24,10 +24,7 @@ export class UsersController {
   })
   async getView(@Res() res: Response) {
     this.logger.log('webview api called');
-    res.status(HttpStatus.OK).json({
-      success: true,
-      message: 'webview sample',
-      data: {
+    const data={
         url: 'https://chicos.com/checkout/xxx',
         method: 'post',
         cookies: [
@@ -41,8 +38,9 @@ export class UsersController {
             path: '/',
           },
         ],
-      },
-    });
+    }
+    response(true,HttpStatus.OK,'Webview sample',data,res);
+    
   }
 
   /**
@@ -63,7 +61,11 @@ export class UsersController {
   async getOne(@Param('id') id: string, @Res() res: Response) {
     this.logger.log('get user by id');
     const user = await this.userService.findOne(id);
-    res.status(HttpStatus.OK).json({ success: true, message: 'User retrieved sucessfully', data: user });
+    if (!user) {
+      response(false,HttpStatus.BAD_REQUEST,'User not found',null,res);
+    } else {
+      response(true,HttpStatus.OK,'User retrieved successfully',user,res); 
+    }
   }
 
   /**
@@ -82,6 +84,10 @@ export class UsersController {
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     this.logger.log('create user');
     const user = await this.userService.create(createUserDto);
-    res.status(HttpStatus.CREATED).json({ success: true, message: 'User registered sucessfully', data: user });
+    if (!user) {
+      response(false,HttpStatus.BAD_REQUEST,'User not found',null,res);
+    } else {
+      response(true,HttpStatus.CREATED,'User registered successfully',user,res); 
+    }
   }
 }
