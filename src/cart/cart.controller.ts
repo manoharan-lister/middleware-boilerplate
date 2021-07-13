@@ -1,15 +1,20 @@
-import { Controller, Get, HttpStatus, Logger, Param, Res, HttpException } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Logger, Param, Res, ParseIntPipe } from '@nestjs/common';
 import { Response } from 'express';
 import { CartsService } from './cart.service';
 import { CartSuccessResponse, CartErrorResponse } from './dto/cart.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {response} from '../common/response';
+import { response } from '../common/response';
 @ApiTags('carts')
 @Controller('carts')
 export class CartsController {
   private readonly logger = new Logger(CartsController.name);
   constructor(private readonly cartService: CartsService) {}
 
+  /**
+   * Cet cart details by id
+   * @param id
+   * @param res
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Get cart details by id' })
   @ApiResponse({
@@ -20,15 +25,14 @@ export class CartsController {
   @ApiResponse({ status: 400, description: 'Bad Request', type: CartErrorResponse })
   @ApiResponse({ status: 401, description: 'Unauthorized', type: CartErrorResponse })
   @ApiResponse({ status: 500, description: 'Internal Server Error', type: CartErrorResponse })
-  getOne(@Param('id') id: string, @Res() res: Response) {
-    this.logger.log('get cart by id');
+  getOne(@Param('id', new ParseIntPipe()) id: string, @Res() res: Response) {
+    this.logger.log(`get cart by id: ${id}`);
     // custom error
     if (id != '1') {
-      response(false,HttpStatus.BAD_REQUEST,'Cart not found',null,res);
-    }else{
+      response(false, HttpStatus.BAD_REQUEST, 'Cart not found', null, res);
+    } else {
       const cart = this.cartService.findOne(id);
-      response(true,HttpStatus.OK,'Cart details',cart,res);
+      response(true, HttpStatus.OK, 'Cart details', cart, res);
     }
-    
   }
 }

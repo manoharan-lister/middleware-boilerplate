@@ -1,20 +1,23 @@
-import { Injectable, Logger, NestMiddleware, HttpException } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, Logger, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import { Response, NextFunction } from 'express';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class ValidateJwtMiddleware implements NestMiddleware {
   private readonly logger = new Logger(ValidateJwtMiddleware.name);
-//   constructor(private readonly jwt: JwtService) {}
-  constructor(private readonly jwtService: JwtService) {}
 
-  use(req: any, next: NextFunction) {
-    if (req.headers['token']) {
-      this.logger.log('Jwt auth Middleware called.');
-      const token: any = req.headers['token'];
-      const decodedToken = this.jwtService.verify(token, { secret: 'LISTER_MIDDLEWARE' });
-      req.decodedToken = decodedToken;
-    } else throw new HttpException('Unauthorised', 401);
-    next();
+  use(req: any, res: Response, next: NextFunction) {
+    this.logger.log('Jwt auth Middleware called.');
+
+    if (req.headers['authorization']) {
+      try {
+        const token: any = req.headers['authorization'].split(' ')[1];
+        const decodedToken = jwt.verify(token, 'LISTER_MIDDLEWARE');
+        req.decodedToken = decodedToken;
+        next();
+      } catch (error) {
+        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+      }
+    } else throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
   }
 }

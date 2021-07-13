@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class OrdersService {
   findOne(id: string): any {
     return {
-      cartItems: [
+      items: [
         {
           id: id, //required
           productId: '', //required
