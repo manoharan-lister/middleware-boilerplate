@@ -20,10 +20,7 @@ export class UsersService {
     } catch (e) {
       throw new HttpException(
         {
-          error: {
-            success: false,
-            message: 'User not found...',
-          },
+          message:'User not found',
         },
         HttpStatus.BAD_REQUEST,
       );

@@ -7,12 +7,12 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { AuthModule } from './auth/auth.module';
 import { ValidationPipe } from '@nestjs/common';
-
+import {AnyExceptionFilter} from './common/any-exception.filter';
 async function bootstrapUser() {
   const app = await NestFactory.create(UserModule, {
     logger: ['error', 'warn', 'debug', 'log'],
   });
-
+  app.useGlobalFilters(new AnyExceptionFilter());
   // swagger
   const config = new DocumentBuilder()
     .setTitle('Users')
@@ -34,7 +34,7 @@ async function bootstrapProduct() {
   const app = await NestFactory.create(ProductModule, {
     logger: ['error', 'warn', 'debug', 'log'],
   });
-
+  app.useGlobalFilters(new AnyExceptionFilter());
   // swagger
   const config = new DocumentBuilder()
     .setTitle('Products')
@@ -55,6 +55,7 @@ async function bootstrapCart() {
   const app = await NestFactory.create(CartModule, {
     logger: ['error', 'warn', 'debug', 'log'],
   });
+  app.useGlobalFilters(new AnyExceptionFilter());
   // swagger
   const config = new DocumentBuilder()
     .setTitle('Cart')
@@ -74,6 +75,7 @@ async function bootstrapOrder() {
   const app = await NestFactory.create(OrderModule, {
     logger: ['error', 'warn', 'debug', 'log'],
   });
+  app.useGlobalFilters(new AnyExceptionFilter());
   // swagger
   const config = new DocumentBuilder()
     .setTitle('Order')
@@ -93,6 +95,7 @@ async function bootstrapAuth() {
   const app = await NestFactory.create(AuthModule, {
     logger: ['error', 'warn', 'debug', 'log'],
   });
+  app.useGlobalFilters(new AnyExceptionFilter());
   await app.listen(3004);
   console.log(`Auth application is running on: ${await app.getUrl()}`);
 }

@@ -1,6 +1,3 @@
-import { Res } from '@nestjs/common';
-import { Response } from 'express';
-
 export const response = (status, statusCode, message, data, res) => {
   if (status == true) {
     res.status(statusCode).json({
@@ -11,9 +8,7 @@ export const response = (status, statusCode, message, data, res) => {
   } else {
     res.status(statusCode).json({
       success: false,
-      error: {
-        message: message,
-      },
+      message:message
     });
   }
 };
