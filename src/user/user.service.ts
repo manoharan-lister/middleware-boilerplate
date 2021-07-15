@@ -14,17 +14,8 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<Observable<AxiosResponse<any>>> {
-    try {
-      const response = await this.httpService.get('https://jsonplaceholder.typicode.com/users/' + id).toPromise();
-      return response.data;
-    } catch (e) {
-      throw new HttpException(
-        {
-          message:'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const response = await this.httpService.get('https://jsonplaceholder.typicode.com/users/' + id).toPromise();
+    return response.data;
   }
 
   getWebview() {

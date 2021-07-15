@@ -1,14 +1,18 @@
-import { Controller, Get, HttpStatus, Logger, Param, Res, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Logger, Param, Res, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { CartsService } from './cart.service';
 import { CartSuccessResponse, CartErrorResponse } from './dto/cart.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { response } from '../common/response';
+import { ResponseHandler } from '../common/response';
+
 @ApiTags('carts')
+@ApiResponse({ status: 400, description: 'Bad Request', type: CartErrorResponse })
+@ApiResponse({ status: 401, description: 'Unauthorized', type: CartErrorResponse })
+@ApiResponse({ status: 500, description: 'Internal Server Error', type: CartErrorResponse })
 @Controller('carts')
 export class CartsController {
   private readonly logger = new Logger(CartsController.name);
-  constructor(private readonly cartService: CartsService) {}
+  constructor(private readonly cartService: CartsService, private readonly responseHandler: ResponseHandler) {}
 
   /**
    * Cet cart details by id
@@ -22,17 +26,11 @@ export class CartsController {
     description: 'OK',
     type: CartSuccessResponse,
   })
-  @ApiResponse({ status: 400, description: 'Bad Request', type: CartErrorResponse })
-  @ApiResponse({ status: 401, description: 'Unauthorized', type: CartErrorResponse })
-  @ApiResponse({ status: 500, description: 'Internal Server Error', type: CartErrorResponse })
   getOne(@Param('id', new ParseIntPipe()) id: string, @Res() res: Response) {
     this.logger.log(`get cart by id: ${id}`);
+    const cart = this.cartService.findOne(id);
     // custom error
-    if (id != '1') {
-      response(false, HttpStatus.BAD_REQUEST, 'Cart not found', null, res);
-    } else {
-      const cart = this.cartService.findOne(id);
-      response(true, HttpStatus.OK, 'Cart details', cart, res);
-    }
+    if (id != '1') throw new BadRequestException('Cart not found');
+    this.responseHandler.response(true, HttpStatus.OK, 'Cart details', cart, res);
   }
 }

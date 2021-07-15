@@ -1,4 +1,4 @@
-export let products = [
+export const products = [
   {
     'product-id': 1,
     'variant-id': '001-001',

@@ -1,14 +1,14 @@
-import { Controller, Get, Res, Param, HttpStatus, Logger, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Res, Param, HttpStatus, Logger, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { Response } from 'express';
 import { ProductsService } from './product.service';
 import { ProductSuccessResponse, ProductErrorResponse } from './dto/product.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { response } from '../common/response';
+import { ResponseHandler } from '../common/response';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly appService: ProductsService) {}
+  constructor(private readonly appService: ProductsService, private readonly responseHandler: ResponseHandler) {}
   private readonly logger = new Logger(ProductsController.name);
 
   /**
@@ -37,10 +37,7 @@ export class ProductsController {
   findOne(@Param('id', new ParseIntPipe()) id: string, @Res() res: Response) {
     this.logger.log(`get product by id: ${id}`);
     const product = this.appService.findOne(id);
-    if (product) {
-      response(true, HttpStatus.OK, 'Product details', product, res);
-    } else {
-      response(false, HttpStatus.BAD_REQUEST, 'Product not found', null, res);
-    }
+    if (!product) throw new BadRequestException('Product not found');
+    this.responseHandler.response(true, HttpStatus.OK, 'Product details', product, res);
   }
 }

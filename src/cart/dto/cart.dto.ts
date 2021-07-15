@@ -14,32 +14,6 @@ export class CartDto {
   price: string;
 }
 
-// {
-//   "cartItems": [
-//       {
-//           "id": "1",
-//           "productId": "",
-//           "brand": "",
-//           "color": "",
-//           "isInStock": true,
-//           "title": "",
-//           "thumbnailUrl": "",
-//           "quantity": 0,
-//           "variantId": "",
-//           "variantName": "",
-//           "price": {
-//               "now": 0,
-//               "was": 0
-//           }
-//       }
-//   ],
-//   "total": {
-//       "now": 0,
-//       "was": 0
-//   },
-//   "customData": {}
-// }  
-
 export class CartSuccessResponse {
   @ApiProperty({ default: true })
   success: boolean;

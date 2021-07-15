@@ -1,15 +1,30 @@
-import { Controller, Get, Post, Param, Body, Res, HttpStatus, Logger, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Res,
+  HttpStatus,
+  Logger,
+  ParseIntPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
 import { CreateUserDto, UserSuccessResponse, UserErrorResponse } from './dto/create-user.dto';
 import { WebviewDto } from './dto/webview.dto';
 import { Response } from 'express';
-import { response } from '../common/response';
+import { ResponseHandler } from '../common/response';
+
 @ApiTags('users')
+@ApiResponse({ status: 400, description: 'Bad Request', type: UserErrorResponse })
+@ApiResponse({ status: 401, description: 'Unauthorized', type: UserErrorResponse })
+@ApiResponse({ status: 500, description: 'Internal Server Error', type: UserErrorResponse })
 @Controller('users')
 export class UsersController {
   private readonly logger = new Logger(UsersController.name);
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService, private readonly responseHandler: ResponseHandler) {}
 
   /**
    * get webview details
@@ -25,7 +40,12 @@ export class UsersController {
   async getView(@Res() res: Response) {
     this.logger.log('webview api called');
     const data = this.userService.getWebview();
-    response(true, HttpStatus.OK, 'Webview sample', data, res);
+    res.cookie('checkout', '123-456-789', {
+      expires: new Date(new Date().getTime() + 30 * 1000),
+      sameSite: 'strict',
+      httpOnly: true,
+    });
+    this.responseHandler.response(true, HttpStatus.OK, 'Webview sample', data, res);
   }
 
   /**
@@ -40,19 +60,11 @@ export class UsersController {
     description: 'OK',
     type: UserSuccessResponse,
   })
-  @ApiResponse({ status: 400, description: 'Bad Request', type: UserErrorResponse })
-  @ApiResponse({ status: 401, description: 'Unauthorized', type: UserErrorResponse })
-  @ApiResponse({ status: 500, description: 'Internal Server Error', type: UserErrorResponse })
   async getOne(@Param('id', new ParseIntPipe()) id: string, @Res() res: Response) {
-    console.log(id);
     this.logger.log(`get user by id: ${id}`);
     const user = await this.userService.findOne(id);
-    console.log('user--->', user);
-    if (!user) {
-      response(false, HttpStatus.BAD_REQUEST, 'User not found', null, res);
-    } else {
-      response(true, HttpStatus.OK, 'User retrieved successfully', user, res);
-    }
+    if (!user) throw new BadRequestException('User not found');
+    this.responseHandler.response(true, HttpStatus.OK, 'User retrieved successfully', user, res);
   }
 
   /**
@@ -71,6 +83,6 @@ export class UsersController {
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     this.logger.log('create user');
     const user = await this.userService.create(createUserDto);
-    response(true, HttpStatus.CREATED, 'User registered successfully', user, res);
+    this.responseHandler.response(true, HttpStatus.CREATED, 'User registered successfully', user, res);
   }
 }

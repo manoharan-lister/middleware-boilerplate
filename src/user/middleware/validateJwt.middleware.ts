@@ -1,4 +1,4 @@
-import { Injectable, Logger, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
@@ -16,8 +16,8 @@ export class ValidateJwtMiddleware implements NestMiddleware {
         req.decodedToken = decodedToken;
         next();
       } catch (error) {
-        throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+        throw new UnauthorizedException('Invalid token');
       }
-    } else throw new HttpException('Not authorized.', HttpStatus.UNAUTHORIZED);
+    } else throw new UnauthorizedException('Not authorized.');
   }
 }
